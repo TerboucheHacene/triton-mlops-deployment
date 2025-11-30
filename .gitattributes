@@ -1,0 +1,50 @@
+# Auto detect text files and normalize line endings to LF
+* text=auto eol=lf
+
+# Source code
+*.py text eol=lf
+*.sh text eol=lf
+*.yaml text eol=lf
+*.yml text eol=lf
+*.json text eol=lf
+*.pbtxt text eol=lf
+*.md text eol=lf
+*.txt text eol=lf
+
+# Jupyter Notebooks
+*.ipynb text eol=lf
+
+# Docker files
+Dockerfile text eol=lf
+docker-compose.yaml text eol=lf
+
+# Binary files
+*.pt binary
+*.pth binary
+*.onnx binary
+*.pb binary
+*.pkl binary
+*.h5 binary
+
+# Images
+*.jpg binary
+*.jpeg binary
+*.png binary
+*.gif binary
+*.ico binary
+*.svg text
+
+# Archives
+*.zip binary
+*.tar binary
+*.gz binary
+*.tgz binary
+
+# Git configuration
+.gitignore text eol=lf
+.gitattributes text eol=lf
+
+# Mark large model files with Git LFS (if used in future)
+# *.pt filter=lfs diff=lfs merge=lfs -text
+# *.pth filter=lfs diff=lfs merge=lfs -text
+# *.onnx filter=lfs diff=lfs merge=lfs -text
