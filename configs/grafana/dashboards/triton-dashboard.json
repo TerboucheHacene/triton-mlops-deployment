@@ -1,0 +1,404 @@
+{
+  "id": null,
+  "uid": "triton-metrics",
+  "title": "Triton Inference Server Metrics",
+    "tags": ["triton", "inference", "mlops"],
+    "timezone": "browser",
+    "schemaVersion": 16,
+    "version": 0,
+    "refresh": "5s",
+    "panels": [
+      {
+        "id": 1,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 0},
+        "type": "graph",
+        "title": "Request Rate (Requests/sec)",
+        "targets": [
+          {
+            "expr": "rate(nv_inference_request_success{job=\"triton\"}[1m])",
+            "legendFormat": "{{model}} - Success",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(nv_inference_request_failure{job=\"triton\"}[1m])",
+            "legendFormat": "{{model}} - Failure",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "reqps", "label": "Requests/sec"},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "rightSide": false,
+          "values": true,
+          "current": true,
+          "avg": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 2,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 0},
+        "type": "graph",
+        "title": "Average Batch Size",
+        "targets": [
+          {
+            "expr": "rate(nv_inference_request_success{job=\"triton\"}[1m]) / rate(nv_inference_exec_count{job=\"triton\"}[1m])",
+            "legendFormat": "{{model}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "short", "label": "Batch Size", "min": 0},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true,
+          "max": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 3,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 8},
+        "type": "graph",
+        "title": "Average Request Duration (milliseconds)",
+        "targets": [
+          {
+            "expr": "nv_inference_request_duration_us{job=\"triton\"} / nv_inference_request_success{job=\"triton\"} / 1000",
+            "legendFormat": "{{model}} - Overall Avg",
+            "refId": "A"
+          },
+          {
+            "expr": "rate(nv_inference_request_duration_us{job=\"triton\"}[1m]) / rate(nv_inference_request_success{job=\"triton\"}[1m]) / 1000",
+            "legendFormat": "{{model}} - Recent Avg (1m)",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Duration"},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true,
+          "max": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 4,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "type": "gauge",
+        "title": "GPU Utilization (%)",
+        "targets": [
+          {
+            "expr": "nv_gpu_utilization{job=\"triton\"}",
+            "legendFormat": "GPU {{gpu_uuid}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 50, "color": "yellow"},
+                {"value": 80, "color": "red"}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "type": "graph",
+        "title": "GPU Memory Usage (%)",
+        "targets": [
+          {
+            "expr": "nv_gpu_memory_used_bytes{job=\"triton\"} / nv_gpu_memory_total_bytes{job=\"triton\"} * 100",
+            "legendFormat": "GPU {{gpu_uuid}}",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "Memory Usage", "max": 100, "min": 0},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true,
+          "max": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 6,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "type": "graph",
+        "title": "Queue Time - Batching Delay (milliseconds)",
+        "targets": [
+          {
+            "expr": "rate(nv_inference_queue_duration_us{job=\"triton\"}[1m]) / rate(nv_inference_request_success{job=\"triton\"}[1m]) / 1000",
+            "legendFormat": "{{model}} - Avg Queue Time",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Queue Time"},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 7,
+        "gridPos": {"h": 6, "w": 6, "x": 0, "y": 24},
+        "type": "stat",
+        "title": "Total Successful Requests",
+        "targets": [
+          {
+            "expr": "sum(nv_inference_request_success{job=\"triton\"})",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "text"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 8,
+        "gridPos": {"h": 6, "w": 6, "x": 6, "y": 24},
+        "type": "stat",
+        "title": "Total Failed Requests",
+        "targets": [
+          {
+            "expr": "sum(nv_inference_request_failure{job=\"triton\"})",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "thresholds"},
+            "mappings": [],
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 1, "color": "red"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 9,
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 24},
+        "type": "stat",
+        "title": "Total GPU Executions",
+        "targets": [
+          {
+            "expr": "sum(nv_inference_exec_count{job=\"triton\"})",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "short",
+            "color": {"mode": "palette-classic"}
+          }
+        }
+      },
+      {
+        "id": 10,
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 24},
+        "type": "stat",
+        "title": "Batching Efficiency (%)",
+        "targets": [
+          {
+            "expr": "(1 - sum(nv_inference_exec_count{job=\"triton\"}) / sum(nv_inference_request_success{job=\"triton\"})) * 100",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "graphMode": "area",
+          "colorMode": "value",
+          "orientation": "auto",
+          "textMode": "auto"
+        },
+        "fieldConfig": {
+          "defaults": {
+            "unit": "percent",
+            "color": {"mode": "thresholds"},
+            "decimals": 1,
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "red"},
+                {"value": 30, "color": "yellow"},
+                {"value": 50, "color": "green"}
+              ]
+            }
+          }
+        }
+      },
+      {
+        "id": 11,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 30},
+        "type": "graph",
+        "title": "Compute Time per Model (milliseconds)",
+        "targets": [
+          {
+            "expr": "rate(nv_inference_compute_infer_duration_us{job=\"triton\"}[1m]) / rate(nv_inference_exec_count{job=\"triton\"}[1m]) / 1000",
+            "legendFormat": "{{model}} - Avg Compute",
+            "refId": "A"
+          }
+        ],
+        "yaxes": [
+          {"format": "ms", "label": "Compute Time"},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true
+        },
+        "fill": 1,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"}
+      },
+      {
+        "id": 12,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 30},
+        "type": "table",
+        "title": "Model Summary",
+        "targets": [
+          {
+            "expr": "nv_inference_request_success{job=\"triton\"}",
+            "legendFormat": "",
+            "refId": "A",
+            "instant": true,
+            "format": "table"
+          },
+          {
+            "expr": "nv_inference_exec_count{job=\"triton\"}",
+            "legendFormat": "",
+            "refId": "B",
+            "instant": true,
+            "format": "table"
+          }
+        ],
+        "transformations": [
+          {
+            "id": "merge",
+            "options": {}
+          },
+          {
+            "id": "organize",
+            "options": {
+              "excludeByName": {
+                "Time": true,
+                "job": true,
+                "__name__": true
+              },
+              "renameByName": {
+                "model": "Model",
+                "version": "Version",
+                "Value #A": "Total Requests",
+                "Value #B": "Total Executions"
+              }
+            }
+          }
+        ],
+        "options": {
+          "showHeader": true,
+          "sortBy": [
+            {
+              "displayName": "Total Requests",
+              "desc": true
+            }
+          ]
+        }
+      }
+    ],
+    "time": {
+      "from": "now-15m",
+      "to": "now"
+    },
+    "timepicker": {
+      "refresh_intervals": ["5s", "10s", "30s", "1m", "5m", "15m", "30m"]
+    }
+}
