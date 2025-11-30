@@ -38,29 +38,29 @@ class TritonPythonModel:
             input_tensor = pb_utils.get_input_tensor_by_name(request, "INPUT__0")
             image_array = input_tensor.as_numpy()
             
-            # Convert numpy array to PIL Image
-            # Expected input: (H, W, C) or (C, H, W) uint8 array
+            # Handle single image only (H, W, C) - no batching at this level
+            # Image can be any size - we'll resize it
             if image_array.ndim == 3:
                 # Check if it's (C, H, W) format and convert to (H, W, C)
-                if image_array.shape[0] == 3:  # Channels first
+                if image_array.shape[0] == 3 or image_array.shape[0] == 1:  # Channels first
                     image_array = np.transpose(image_array, (1, 2, 0))
                 
                 # Create PIL Image from numpy array
                 image = Image.fromarray(image_array.astype(np.uint8))
             else:
-                raise ValueError(f"Invalid image shape: {image_array.shape}. Expected 3D array.")
+                raise ValueError(f"Invalid image shape: {image_array.shape}. Expected 3D array (H, W, C).")
             
-            # convert to RGB if needed
+            # Convert to RGB if needed
             if image.mode != 'RGB':
                 image = image.convert('RGB')
                 
-            # Apply preprocessing
+            # Apply preprocessing (resize, normalize, etc.)
             preprocessed_image = self.transform(image)
             # Convert to numpy (shape: [3, 224, 224])
             preprocessed_image = preprocessed_image.numpy()
             
-            # Add batch dimension (shape: [1, 3, 224, 224])
-            preprocessed_image = np.expand_dims(preprocessed_image, axis=0)
+            # NO batch dimension added - output is [3, 224, 224]
+            # Triton will batch these at the model level
             
             # Create output tensor
             output_tensor = pb_utils.Tensor("OUTPUT__0", preprocessed_image.astype(np.float32))

@@ -37,26 +37,29 @@ class TritonPythonModel:
             output_tensor = pb_utils.get_input_tensor_by_name(request, "INPUT__0")
             output_data = output_tensor.as_numpy()
             
-            # Get top predictions (argmax across classes)
-            predicted_indices = np.argmax(output_data, axis=1)
-            
-            # Convert indices to labels with bounds checking
-            predicted_labels = []
-            for idx in predicted_indices:
-                idx = int(idx)
-                if 0 <= idx < len(self.imagenet_labels):
-                    predicted_labels.append(self.imagenet_labels[idx])
+            # Handle single output (no batching at this level)
+            # Input shape: [1000] - single prediction scores
+            if output_data.ndim == 1:
+                # Get top prediction (argmax)
+                predicted_idx = int(np.argmax(output_data))
+                
+                # Convert index to label with bounds checking
+                if 0 <= predicted_idx < len(self.imagenet_labels):
+                    predicted_label = self.imagenet_labels[predicted_idx]
                 else:
-                    logger.warning(f"Invalid prediction index: {idx}, using 'unknown'")
-                    predicted_labels.append("unknown")
+                    logger.warning(f"Invalid prediction index: {predicted_idx}, using 'unknown'")
+                    predicted_label = "unknown"
+                
+                logger.info(f"Predicted label: {predicted_label}")
+                
+                # Create output tensor - single label
+                label_tensor = pb_utils.Tensor(
+                    "LABELS", 
+                    np.array([predicted_label], dtype=object)
+                )
+            else:
+                raise ValueError(f"Invalid output shape: {output_data.shape}. Expected 1D array [1000].")
             
-            logger.info(f"Predicted labels: {predicted_labels}")
-            
-            # Create output tensor
-            label_tensor = pb_utils.Tensor(
-                "LABELS", 
-                np.array(predicted_labels, dtype=object)
-            )
             response = pb_utils.InferenceResponse(output_tensors=[label_tensor])
             responses.append(response)
         return responses

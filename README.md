@@ -312,6 +312,7 @@ See [`docs/API_GUIDE.md`](docs/API_GUIDE.md) for more examples.
 - **[Triton Logging Guide](docs/TRITON_LOGGING_GUIDE.md)**: Complete guide to viewing and debugging logs
 - **[Model Setup](docs/MODEL_SETUP.md)**: Detailed model download and configuration
 - **[API Guide](docs/API_GUIDE.md)**: REST API usage and code examples
+- **[Load Testing](docs/LOAD_TESTING.md)**: Performance testing with Locust
 - **[Troubleshooting](docs/TROUBLESHOOTING.md)**: Common issues and solutions
 - **[Model Repository](model_repository/README.md)**: Model specifications
 - **[Notebooks](notebooks/README.md)**: Jupyter notebook documentation
