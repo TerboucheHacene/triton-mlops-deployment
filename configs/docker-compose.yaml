@@ -18,7 +18,7 @@ services:
       - "8001:8001"   # gRPC
       - "8002:8002"   # Metrics
     volumes:
-      - /home/hacene/Documents/workspace/MLOps/model_deployment/model_repository:/models
+      - /home/hacene/triton-mlops-deployment/model_repository:/models
     command: >
       tritonserver
       --model-repository=/models
@@ -69,6 +69,37 @@ services:
       - ./grafana/datasources:/etc/grafana/provisioning/datasources:ro
     depends_on:
       - prometheus
+      - loki
+    networks:
+      - triton-network
+    restart: unless-stopped
+
+  # Loki - Log aggregation system
+  loki:
+    image: grafana/loki:latest
+    container_name: loki
+    ports:
+      - "3100:3100"
+    volumes:
+      - ./loki-config.yaml:/etc/loki/loki-config.yaml:ro
+      - loki_data:/loki
+    command: -config.file=/etc/loki/loki-config.yaml
+    networks:
+      - triton-network
+    restart: unless-stopped
+
+  # Promtail - Log collector for Loki
+  promtail:
+    image: grafana/promtail:latest
+    container_name: promtail
+    volumes:
+      - ./promtail-config.yaml:/etc/promtail/promtail-config.yaml:ro
+      - /var/run/docker.sock:/var/run/docker.sock:ro
+      - /var/lib/docker/containers:/var/lib/docker/containers:ro
+    command: -config.file=/etc/promtail/promtail-config.yaml
+    depends_on:
+      - loki
+      - triton
     networks:
       - triton-network
     restart: unless-stopped
@@ -80,3 +111,4 @@ networks:
 volumes:
   prometheus_data:
   grafana_data:
+  loki_data:
