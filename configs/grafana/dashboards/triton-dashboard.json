@@ -104,9 +104,9 @@
       },
       {
         "id": 4,
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 8},
+        "gridPos": {"h": 6, "w": 6, "x": 12, "y": 8},
         "type": "gauge",
-        "title": "GPU Utilization (%)",
+        "title": "GPU Utilization - Current",
         "targets": [
           {
             "expr": "nv_gpu_utilization{job=\"triton\"}",
@@ -139,10 +139,82 @@
         }
       },
       {
-        "id": 5,
-        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 16},
+        "id": 13,
+        "gridPos": {"h": 6, "w": 6, "x": 18, "y": 8},
+        "type": "gauge",
+        "title": "GPU Memory - Current",
+        "targets": [
+          {
+            "expr": "nv_gpu_memory_used_bytes{job=\"triton\"} / nv_gpu_memory_total_bytes{job=\"triton\"} * 100",
+            "legendFormat": "GPU {{gpu_uuid}}",
+            "refId": "A"
+          }
+        ],
+        "options": {
+          "reduceOptions": {
+            "values": false,
+            "calcs": ["lastNotNull"]
+          },
+          "showThresholdLabels": false,
+          "showThresholdMarkers": true
+        },
+        "fieldConfig": {
+          "defaults": {
+            "thresholds": {
+              "mode": "absolute",
+              "steps": [
+                {"value": 0, "color": "green"},
+                {"value": 70, "color": "yellow"},
+                {"value": 90, "color": "red"}
+              ]
+            },
+            "unit": "percent",
+            "min": 0,
+            "max": 100
+          }
+        }
+      },
+      {
+        "id": 14,
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 14},
         "type": "graph",
-        "title": "GPU Memory Usage (%)",
+        "title": "GPU Utilization Over Time (%)",
+        "targets": [
+          {
+            "expr": "max_over_time(nv_gpu_utilization{job=\"triton\"}[30s])",
+            "legendFormat": "GPU {{gpu_uuid}} - Max (30s)",
+            "refId": "A"
+          },
+          {
+            "expr": "nv_gpu_utilization{job=\"triton\"}",
+            "legendFormat": "GPU {{gpu_uuid}} - Instant",
+            "refId": "B"
+          }
+        ],
+        "yaxes": [
+          {"format": "percent", "label": "GPU Utilization", "max": 100, "min": 0},
+          {"format": "short"}
+        ],
+        "legend": {
+          "show": true,
+          "alignAsTable": true,
+          "values": true,
+          "current": true,
+          "avg": true,
+          "max": true
+        },
+        "fill": 2,
+        "linewidth": 2,
+        "tooltip": {"shared": true, "sort": 0, "value_type": "individual"},
+        "thresholds": [
+          {"value": 80, "colorMode": "critical", "op": "gt", "fill": true, "line": true}
+        ]
+      },
+      {
+        "id": 5,
+        "gridPos": {"h": 8, "w": 12, "x": 0, "y": 14},
+        "type": "graph",
+        "title": "GPU Memory Usage Over Time (%)",
         "targets": [
           {
             "expr": "nv_gpu_memory_used_bytes{job=\"triton\"} / nv_gpu_memory_total_bytes{job=\"triton\"} * 100",
@@ -168,7 +240,7 @@
       },
       {
         "id": 6,
-        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 16},
+        "gridPos": {"h": 8, "w": 12, "x": 12, "y": 22},
         "type": "graph",
         "title": "Queue Time - Batching Delay (milliseconds)",
         "targets": [

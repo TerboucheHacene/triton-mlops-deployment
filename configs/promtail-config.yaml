@@ -34,4 +34,18 @@ scrape_configs:
     
     pipeline_stages:
       - docker: {}
+      
+      # Match and parse Triton log format: I1201 16:49:42.850686 1 http_server.cc:141] message
+      - regex:
+          expression: '^(?P<level>[IWE])(?P<month>\d{2})(?P<day>\d{2})\s+(?P<time>[\d:.]+)\s+(?P<thread>\d+)\s+(?P<file>[^:]+):(?P<line>\d+)\]\s+(?P<content>.*)$'
+      
+      # Map single-letter log levels to full names
+      - template:
+          source: level
+          template: '{{ if eq .level "I" }}INFO{{ else if eq .level "W" }}WARN{{ else if eq .level "E" }}ERROR{{ else }}DEBUG{{ end }}'
+      
+      # Add labels (level and file for filtering)
+      - labels:
+          level:
+          file:
 
